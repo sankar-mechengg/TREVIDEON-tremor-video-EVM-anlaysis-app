@@ -12,7 +12,7 @@ export const APP = {
 }
 
 export const PEOPLE = {
-  developer: { name: 'Sankar Balasubramanian', linkedin: 'https://www.linkedin.com/in/sankar4' },
+  developer: { name: 'B. Sankar', creditName: 'Sankar Balasubramanian', linkedin: 'https://www.linkedin.com/in/sankar4' },
   pi: { name: 'Prof. Biswarup Mukherjee', title: 'Principal Investigator' },
 }
 
@@ -23,9 +23,9 @@ export const ORG = {
 }
 
 export const CITATION = {
-  text: `Balasubramanian, S., & Mukherjee, B. (${APP.year}). ${APP.name}: ${APP.expansion} (Version ${APP.version}) [Computer software]. RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi. ${APP.repo}`,
+  text: `Sankar, B., & Mukherjee, B. (${APP.year}). ${APP.name}: ${APP.expansion} (Version ${APP.version}) [Computer software]. RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi. ${APP.repo}`,
   bibtex: `@software{trevideon${APP.year},
-  author    = {Balasubramanian, Sankar and Mukherjee, Biswarup},
+  author    = {Sankar, B. and Mukherjee, Biswarup},
   title     = {{${APP.name}}: {${APP.expansion}}},
   year      = {${APP.year}},
   version   = {${APP.version}},

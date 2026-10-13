@@ -60,7 +60,7 @@ export function Footer() {
           <p className="dim">{APP.expansion}. {APP.short}.</p>
           <p className="made">
             Made with <span className="heart" aria-label="love">♥</span> by{' '}
-            <a href={PEOPLE.developer.linkedin} target="_blank" rel="noreferrer">{PEOPLE.developer.name}</a>
+            <a href={PEOPLE.developer.linkedin} target="_blank" rel="noreferrer">{PEOPLE.developer.creditName}</a>
           </p>
           <p className="dim">PI: {PEOPLE.pi.name}</p>
         </div>

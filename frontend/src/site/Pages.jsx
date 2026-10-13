@@ -131,7 +131,7 @@ export function Cite() {
         {METHOD_REFS.map((r) => <li key={r.key}><b>{r.key}</b> ({r.use}): {r.text}</li>)}
       </ul>
       <h2>Suggested methods text</h2>
-      <p className="quote">Hand tremor was quantified with {APP.name} v{APP.version} (Balasubramanian & Mukherjee, {APP.year}). Repeated video frames were repaired by motion interpolation. Camera motion above 1 Hz was removed by background-feature stabilisation. Sub-pixel motion of the hand was measured with dense optical flow (DIS; Kroeger et al., 2016) on the un-magnified video, band-passed to 4–12 Hz, and summarised as per-finger dominant frequency (Welch velocity spectrum), RMS amplitude and band power. For visualisation, motion was magnified 15× with phase-based Eulerian Video Magnification (Riesz pyramid; Wadhwa et al., 2014). Hand landmarks were obtained with MediaPipe Hands (Zhang et al., 2020).</p>
+      <p className="quote">Hand tremor was quantified with {APP.name} v{APP.version} (Sankar & Mukherjee, {APP.year}). Repeated video frames were repaired by motion interpolation. Camera motion above 1 Hz was removed by background-feature stabilisation. Sub-pixel motion of the hand was measured with dense optical flow (DIS; Kroeger et al., 2016) on the un-magnified video, band-passed to 4–12 Hz, and summarised as per-finger dominant frequency (Welch velocity spectrum), RMS amplitude and band power. For visualisation, motion was magnified 15× with phase-based Eulerian Video Magnification (Riesz pyramid; Wadhwa et al., 2014). Hand landmarks were obtained with MediaPipe Hands (Zhang et al., 2020).</p>
     </Page>
   )
 }

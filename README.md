@@ -92,7 +92,7 @@ deleted 60 min after the last activity (or on request). See [docs/DEPLOY.md](doc
 
 ```bibtex
 @software{trevideon2026,
-  author    = {Balasubramanian, Sankar and Mukherjee, Biswarup},
+  author    = {Sankar, B. and Mukherjee, Biswarup},
   title     = {{TREVIDEON}: {TRemor Eulerian VIDEO magnificatiON}},
   year      = {2026},
   version   = {1.0.0},

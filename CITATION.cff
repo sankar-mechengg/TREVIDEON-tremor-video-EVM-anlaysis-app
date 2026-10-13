@@ -9,8 +9,8 @@ abstract: >-
   hand with a wrist-anchored, size-normalised view, repairs repeated video frames, and computes tremor
   statistics for user-defined event markers.
 authors:
-  - family-names: Balasubramanian
-    given-names: Sankar
+  - family-names: Sankar
+    given-names: B.
     affiliation: "RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi"
   - family-names: Mukherjee
     given-names: Biswarup
