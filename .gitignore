@@ -1,0 +1,14 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+backend/models/*.pt
+backend/models/*.task
+backend/models/*.tflite
+# Node
+frontend/node_modules/
+frontend/dist/
+# local env / data
+.env
+*.local
+*.part

@@ -1,0 +1,26 @@
+TREVIDEON - TRemor Eulerian VIDEO magnificatiON
+Copyright 2026 Sankar Balasubramanian, RISE Lab (Rehab, Instrumentation & Sensory Engineering Lab),
+Centre for Biomedical Engineering, Indian Institute of Technology Delhi.
+Principal Investigator: Prof. Biswarup Mukherjee.
+
+This product includes software developed by the authors above and is licensed under the Apache License,
+Version 2.0 (see LICENSE).
+
+It implements methods described in:
+  - Wu et al., Eulerian Video Magnification for Revealing Subtle Changes in the World, SIGGRAPH 2012.
+  - Wadhwa et al., Riesz Pyramids for Fast Phase-Based Video Magnification, ICCP 2014.
+  - Kroeger et al., Fast Optical Flow using Dense Inverse Search, ECCV 2016.
+
+Third-party components (used, not modified; each under its own license):
+  - MediaPipe (hand landmarker, multiclass selfie segmenter) - Apache License 2.0
+  - SAM 2 / SAM 2.1 (Meta Platforms) - Apache License 2.0
+  - OpenCV - Apache License 2.0
+  - PyTorch - BSD-3-Clause; NumPy, SciPy - BSD-3-Clause
+  - FastAPI (MIT), Starlette (BSD-3-Clause), Uvicorn (BSD-3-Clause)
+  - FFmpeg binaries via imageio-ffmpeg - LGPL / GPL (depending on the build)
+  - React, React Router, Vite - MIT; three.js - MIT
+  - GSAP - GSAP Standard "No Charge" License (https://gsap.com/standard-license)
+
+Model weights are downloaded at install time from their publishers and remain under their licenses.
+The RISE Lab and IIT Delhi names and logos are trademarks of their owners and are not licensed under the
+Apache License; they identify where the software was developed and must not be used to imply endorsement.

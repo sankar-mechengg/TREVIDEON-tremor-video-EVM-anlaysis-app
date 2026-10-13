@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use TREVIDEON in your research, please cite it as below."
+type: software
+title: "TREVIDEON: TRemor Eulerian VIDEO magnificatiON"
+abstract: >-
+  Open-source tool for identifying and quantifying hand tremor from video. It magnifies sub-pixel tremor with
+  phase-based Eulerian Video Magnification (Riesz pyramid), measures it with dense optical flow on the
+  un-magnified video (frequency, amplitude, band power, spectra, envelopes), optionally isolates the dominant
+  hand with a wrist-anchored, size-normalised view, repairs repeated video frames, and computes tremor
+  statistics for user-defined event markers.
+authors:
+  - family-names: Balasubramanian
+    given-names: Sankar
+    affiliation: "RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi"
+  - family-names: Mukherjee
+    given-names: Biswarup
+    affiliation: "RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi"
+version: 1.0.0
+date-released: "2026-10-13"
+license: Apache-2.0
+repository-code: "https://github.com/sankar-mechengg/TREVIDEON"
+keywords:
+  - tremor
+  - Eulerian video magnification
+  - phase-based motion magnification
+  - optical flow
+  - hand tracking
+  - stress
+  - biomedical engineering
+references:
+  - type: article
+    title: "Eulerian Video Magnification for Revealing Subtle Changes in the World"
+    authors: [{family-names: Wu, given-names: Hao-Yu}, {family-names: Rubinstein, given-names: Michael}, {family-names: Shih, given-names: Eugene}, {family-names: Guttag, given-names: John}, {family-names: Durand, given-names: Frédo}, {family-names: Freeman, given-names: William T.}]
+    journal: "ACM Transactions on Graphics"
+    year: 2012
+  - type: conference-paper
+    title: "Riesz Pyramids for Fast Phase-Based Video Magnification"
+    authors: [{family-names: Wadhwa, given-names: Neal}, {family-names: Rubinstein, given-names: Michael}, {family-names: Durand, given-names: Frédo}, {family-names: Freeman, given-names: William T.}]
+    conference: {name: "IEEE International Conference on Computational Photography (ICCP)"}
+    year: 2014
+  - type: conference-paper
+    title: "Fast Optical Flow using Dense Inverse Search"
+    authors: [{family-names: Kroeger, given-names: Till}, {family-names: Timofte, given-names: Radu}, {family-names: Dai, given-names: Dengxin}, {family-names: Van Gool, given-names: Luc}]
+    conference: {name: "European Conference on Computer Vision (ECCV)"}
+    year: 2016
