@@ -8,7 +8,7 @@ export const APP = {
   version: '1.0.0',
   year: 2026,
   license: 'Apache License 2.0',
-  repo: 'https://github.com/sankar-mechengg/TREVIDEON',   // public repository (to be published)
+  repo: 'https://github.com/sankar-mechengg/TREVIDEON-tremor-video-EVM-anlaysis-app',
 }
 
 export const PEOPLE = {

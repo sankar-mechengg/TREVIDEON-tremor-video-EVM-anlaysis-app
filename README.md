@@ -97,7 +97,7 @@ deleted 60 min after the last activity (or on request). See [docs/DEPLOY.md](doc
   year      = {2026},
   version   = {1.0.0},
   publisher = {RISE Lab, Centre for Biomedical Engineering, Indian Institute of Technology Delhi},
-  url       = {https://github.com/sankar-mechengg/TREVIDEON},
+  url       = {https://github.com/sankar-mechengg/TREVIDEON-tremor-video-EVM-anlaysis-app},
   license   = {Apache-2.0}
 }
 ```

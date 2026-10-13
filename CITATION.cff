@@ -18,7 +18,7 @@ authors:
 version: 1.0.0
 date-released: "2026-10-13"
 license: Apache-2.0
-repository-code: "https://github.com/sankar-mechengg/TREVIDEON"
+repository-code: "https://github.com/sankar-mechengg/TREVIDEON-tremor-video-EVM-anlaysis-app"
 keywords:
   - tremor
   - Eulerian video magnification
