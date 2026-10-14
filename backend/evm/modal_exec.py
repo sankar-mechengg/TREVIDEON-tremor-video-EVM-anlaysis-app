@@ -49,7 +49,7 @@ class ModalExecutor:
         update({"stage": "upload", "message": "Sending the video to the GPU worker", "progress": 0.0})
         with self.vol.batch_upload(force=True) as batch:
             batch.put_file(spec["video_path"], f"/{jid}/{name}")
-        call = self.fn.spawn(jid, name, spec["settings"], spec["fps"])
+        call = self.fn.spawn(jid, name, spec["settings"], spec["fps"], spec.get("kind", "evm"))
         result = None
         try:
             while True:

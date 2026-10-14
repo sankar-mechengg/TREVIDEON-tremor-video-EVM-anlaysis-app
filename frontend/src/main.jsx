@@ -8,12 +8,14 @@ import './styles.css'
 import './site/site.css'
 
 const Analyzer = lazy(() => import('./app/Analyzer.jsx'))
+const Kinematics = lazy(() => import('./app/Kinematics.jsx'))
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/analyze" element={<Suspense fallback={<div className="fatal">Loading…</div>}><Analyzer /></Suspense>} />
+        <Route path="/analyze/3d" element={<Suspense fallback={<div className="fatal">Loading…</div>}><Kinematics /></Suspense>} />
         <Route element={<SiteLayout />}>
           <Route index element={<Home />} />
           <Route path="guide" element={<Guide />} />

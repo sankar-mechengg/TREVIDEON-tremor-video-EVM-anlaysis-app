@@ -3,3 +3,6 @@ __pycache__
 **/__pycache__
 models/*.pt
 *.pyc
+third_party
+models/*.ckpt
+models/mano

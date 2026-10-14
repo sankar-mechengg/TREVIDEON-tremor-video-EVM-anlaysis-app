@@ -8,7 +8,7 @@ const RATES = [0.1, 0.25, 0.5, 1, 2]
  * The left video is the master clock; the right follows it.
  */
 export default function ComparePlayer({
-  left, right, fps = 30, onTime, seekRequest, rightPlaceholder, rightTabs, leftExtra, initialTime = 0,
+  left, right, fps = 30, onTime, seekRequest, rightPlaceholder, rightTabs, leftExtra, initialTime = 0, rightNode = null,
 }) {
   const L = useRef(null)
   const R = useRef(null)
@@ -123,10 +123,10 @@ export default function ComparePlayer({
   }, [])
 
   useEffect(() => {
-    const panes = [leftPane.current, rightPane.current]
+    const panes = rightNode ? [leftPane.current] : [leftPane.current, rightPane.current]
     panes.forEach((pane) => pane?.addEventListener('wheel', onWheel, { passive: false }))
     return () => panes.forEach((pane) => pane?.removeEventListener('wheel', onWheel))
-  }, [onWheel])
+  }, [onWheel, !!rightNode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onDown = (e) => {
     if (view.s === 1) return
@@ -179,11 +179,11 @@ export default function ComparePlayer({
             <span className="pane-title">{right?.label || 'Processed'}</span>
             {rightTabs}
           </div>
-          <div ref={rightPane} className="pane-body" {...paneProps}>
-            {hasRight ? (
+          <div ref={rightPane} className={`pane-body ${rightNode ? 'pane-3d' : ''}`} {...(rightNode ? {} : paneProps)}>
+            {rightNode || (hasRight ? (
               <video key={right.src} ref={R} src={right.src} style={tf} muted playsInline preload="auto"
                 onLoadedData={() => { if (L.current && R.current) R.current.currentTime = L.current.currentTime }} />
-            ) : <div className="placeholder">{rightPlaceholder}</div>}
+            ) : <div className="placeholder">{rightPlaceholder}</div>)}
           </div>
         </div>
       </div>

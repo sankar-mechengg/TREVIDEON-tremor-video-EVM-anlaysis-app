@@ -259,3 +259,16 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
   .stepper { flex-wrap: wrap; padding: 8px 12px; }
 }
 .notes-strip .warn-line { color: #fcd34d; }
+
+/* home: 3D example */
+.ex3d { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.ex3d-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ex3d-pane { position: relative; aspect-ratio: 1 / 1; background: #0b0f16; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.ex3d-pane video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ex3d-label { position: absolute; left: 10px; bottom: 8px; font-size: 12px; color: #cbd5e1; background: rgba(11, 15, 22, .7); padding: 2px 8px; border-radius: 6px; pointer-events: none; }
+.ex3d-loading { display: grid; place-items: center; height: 100%; min-height: 200px; color: var(--dim); }
+.ex3d-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+.ex3d-nums { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; font-size: 13px; }
+.ex3d-nums .cap { text-transform: capitalize; }
+.ex3d-nums .dim { flex-basis: 100%; text-align: center; }
+@media (max-width: 720px) { .ex3d-panes { grid-template-columns: 1fr; } }

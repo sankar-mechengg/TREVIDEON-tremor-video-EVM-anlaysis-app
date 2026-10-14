@@ -1,0 +1,8 @@
+# Optional: WiLoR 3D hand model for the 3D Kinematics tab (GPU recommended). run.ps1 installs these when an
+# NVIDIA GPU is found; the WiLoR code itself is downloaded into third_party/WiLoR and the checkpoint into models/.
+# MANO (MANO_RIGHT.pkl) must be downloaded by the user from https://mano.is.tue.mpg.de (research licence).
+smplx==0.1.28
+pytorch-lightning>=2.2
+timm>=1.0
+einops>=0.7
+yacs>=0.1.8

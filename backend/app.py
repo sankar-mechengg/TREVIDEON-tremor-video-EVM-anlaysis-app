@@ -39,6 +39,9 @@ from starlette.background import BackgroundTask
 
 from evm import config, markers as MK
 from evm.jobs import EXECUTOR_KIND, JobManager, make_executor
+from evm.kin3d import config3d as C3
+from evm.kin3d.pipeline import keys_for3d, paths3d
+from evm.kin3d.wilor import available as wilor_available
 from evm.pipeline import keys_for, paths
 from evm.scan import ScanManager
 from evm.segment import available as seg_available
@@ -177,7 +180,13 @@ def get_config():
             "limits": LIMITS, "schema": config.SCHEMA, "defaults": config.DEFAULTS,
             "process_keys": config.PROCESS_KEYS, "overlay_keys": config.OVERLAY_KEYS,
             "version": config.PIPELINE_VERSION, "compute": {"gpu": seg["cuda"], "segmenters": seg},
-            "ttl_min": STORE.ttl / 60 if HOSTED else None}
+            "ttl_min": STORE.ttl / 60 if HOSTED else None,
+            "kin3d": {"schema": C3.SCHEMA3D, "defaults": C3.DEFAULTS3D, "process_keys": C3.PROCESS3D,
+                      "display_keys": C3.DISPLAY3D, "version": C3.K3D_VERSION,
+                      "models": {"wilor": wilor_available() if EXECUTOR_KIND == "local" else {"ready": True, "remote": True},
+                                 "mediapipe": True},
+                      "hand_model": {"vibeskin": (not HOSTED) and _hand_fbx("right") is not None},
+                      "mesh": not HOSTED}}
 
 
 # ------------------------------------------------------------------------------------------------ local library
@@ -367,7 +376,7 @@ def list_videos(request: Request):
                       "fps_status": fps_status(info["fps"]),
                       "max_band_hz": config.max_band_hz(info["fps"]),
                       "has_markers": os.path.exists(STORE.markers_path(name, sid)),
-                      "n_results": len(_results_for(name, sid))})
+                      "n_results": len(_results_for(name, sid)), "n_k3d": len(_k3d_results(name, sid))})
     return items
 
 
@@ -646,6 +655,205 @@ def bundle(name: str, key_a: str, request: Request, key_b: str | None = None, vi
                                  "Please cite TREVIDEON if you use these results (see CITATION in the app).\n")
     return FileResponse(tmp.name, media_type="application/zip", filename=f"{stem}_{tag}_{key_a}.zip",
                         background=BackgroundTask(lambda: os.remove(tmp.name)))
+
+
+# ------------------------------------------------------------------------------------------------ 3D kinematics
+HAND_FBX_DIR = os.environ.get("TREVIDEON_HAND_FBX_DIR") or os.path.normpath(
+    os.path.join(APP_ROOT, "..", "..", "..", "Application", "VibeSkinVR", "Assets", "Animated Hands", "Models"))
+
+
+def _hand_fbx(side: str) -> str | None:
+    """The VibeSkin VR 'Animated Hands' mesh (local use only; not part of TREVIDEON's repository)."""
+    f = os.path.join(HAND_FBX_DIR, f"{'r' if side == 'right' else 'l'}_hand_skeletal_lowres.fbx")
+    return f if os.path.isfile(f) else None
+
+
+def _k3d_results(name: str, sid) -> list[dict]:
+    root = os.path.join(STORE.result_dir(name, sid), "k3d")
+    out = []
+    if not os.path.isdir(root):
+        return out
+    for kk in os.listdir(root):
+        p = paths3d(os.path.dirname(root), kk)
+        if not os.path.exists(p["json"]):
+            continue
+        try:
+            with open(p["params"]) as fh:
+                K = json.load(fh)
+        except OSError:
+            continue
+        displays = []
+        if os.path.isdir(p["display_dir"]):
+            for f in os.listdir(p["display_dir"]):
+                if f.endswith(".json") and os.path.exists(os.path.join(p["display_dir"], f[:-5] + ".mp4")):
+                    try:
+                        with open(os.path.join(p["display_dir"], f)) as fh:
+                            dj = json.load(fh)
+                        displays.append({"key_v": f[:-5], "display": dj.get("display"), "created": dj.get("created")})
+                    except (OSError, ValueError):
+                        continue
+        out.append({"key": kk, "params": K, "displays": displays,
+                    "created": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(os.path.getmtime(p["json"])))})
+    return sorted(out, key=lambda r: r["created"], reverse=True)
+
+
+def _prepare3d(video: str, settings: dict, sid):
+    src = _video(video, sid)
+    info = _info(src)
+    if fps_status(info["fps"]) == "blocked":
+        raise HTTPException(400, f"{video}: {info['fps']:.0f} fps is below the minimum of {LIMITS['min_fps']:.0f} fps")
+    s = C3.normalize3d(settings, info["fps"])
+    notes = []
+    if HOSTED:
+        rem = max(0.0, info["duration"] - s["start_s"])
+        if min(s["duration_s"], rem) > LIMITS["max_segment_s"]:
+            s["duration_s"] = LIMITS["max_segment_s"]
+            notes.append(f"Segment shortened to {LIMITS['max_segment_s']:.0f} s (hosted limit)")
+    K, V, R, kk, kv = keys_for3d(src, s, info["fps"])
+    s.update(R)
+    return src, s, info, kk, kv, STORE.result_dir(video, sid), notes
+
+
+@app.post("/api/k3d/check")
+def k3d_check(req: ProcessRequest, request: Request):
+    sid = ctx(request)
+    src, s, info, kk, kv, rd, notes = _prepare3d(req.video, req.settings, sid)
+    p = paths3d(rd, kk, kv)
+    return {"key": kk, "key_v": kv, "k_cached": os.path.exists(p["json"]), "v_cached": os.path.exists(p["display"]),
+            "notes": notes, "effective": s}
+
+
+def _submit3d(req: ProcessRequest, sid):
+    src, s, info, kk, kv, rd, notes = _prepare3d(req.video, req.settings, sid)
+    p = paths3d(rd, kk, kv)
+    if os.path.exists(p["json"]) and os.path.exists(p["display"]):
+        return {"video": req.video, "cached": True, "job": None, "key": kk, "key_v": kv, "notes": notes}
+    spec = {"kind": "kin3d", "video_path": src, "result_dir": rd, "settings": s, "fps": info["fps"],
+            "video": req.video, "export_mesh": not HOSTED}
+    job = JOBS.submit(sid, req.video, spec, kk, kv)
+    return {"video": req.video, "cached": False, "job": JOBS.public(job), "key": kk, "key_v": kv, "notes": notes}
+
+
+@app.post("/api/k3d/process")
+def k3d_process(req: ProcessRequest, request: Request):
+    return _submit3d(req, ctx(request))
+
+
+@app.post("/api/k3d/process_all")
+def k3d_process_all(req: ProcessAll, request: Request):
+    sid = ctx(request)
+    out = []
+    for it in req.items:
+        try:
+            out.append(_submit3d(it, sid))
+        except HTTPException as e:
+            out.append({"video": it.video, "error": e.detail})
+    return out
+
+
+@app.get("/api/videos/{name}/k3d")
+def k3d_results(name: str, request: Request):
+    sid = ctx(request)
+    _video(name, sid)
+    return _k3d_results(name, sid)
+
+
+def _k3d_paths(name, kk, kv, sid):
+    _video(name, sid)
+    if not _KEY.fullmatch(kk) or (kv and not _KEY.fullmatch(kv)):
+        raise HTTPException(400, "Bad key")
+    p = paths3d(STORE.result_dir(name, sid), kk, kv)
+    if not os.path.exists(p["json"]):
+        raise HTTPException(404, "Result not found")
+    return p
+
+
+def _url3d(name, kk, fname, sid):
+    return f"/files3d/{name}/{kk}/{fname}" + (f"?s={sid}" if sid else "")
+
+
+@app.get("/api/k3d/{name}/{kk}")
+def k3d_result(name: str, kk: str, request: Request, key_v: str | None = None):
+    sid = ctx(request)
+    p = _k3d_paths(name, kk, key_v, sid)
+    figs = sorted(f for f in os.listdir(p["figures"]) if f.endswith(".png")) if os.path.isdir(p["figures"]) else []
+    exps = sorted(os.listdir(p["exports"])) if os.path.isdir(p["exports"]) else []
+    urls = {"data": _url3d(name, kk, "kinematics.json", sid),
+            "figures": [{"name": f, "url": _url3d(name, kk, f"figures/{f}", sid)} for f in figs],
+            "exports": [{"name": f, "url": _url3d(name, kk, f"exports/{f}", sid)} for f in exps],
+            "bundle": f"/api/k3d/{name}/{kk}/bundle.zip?{'key_v=' + key_v + '&' if key_v else ''}"
+                      f"{'s=' + sid if sid else ''}"}
+    if key_v and os.path.exists(p["display"]):
+        urls["display"] = _url3d(name, kk, f"display/{key_v}.mp4", sid)
+    if os.path.exists(p["mesh"]) and not HOSTED:
+        urls["mesh"] = _url3d(name, kk, "mesh.bin", sid)
+    disp = None
+    if key_v and os.path.exists(p.get("display_json", "")):
+        with open(p["display_json"]) as fh:
+            disp = json.load(fh)
+    with open(p["params"]) as fh:
+        K = json.load(fh)
+    return {"key": kk, "key_v": key_v, "params": K, "display": disp, "urls": urls}
+
+
+_ALLOWED3D = re.compile(r"^(kinematics\.json|mesh\.bin|display/[0-9a-f]{12}\.mp4|figures/[\w.-]+\.png|"
+                        r"exports/[\w.-]+\.(csv|mat|bvh|glb))$")
+_MEDIA = {".json": "application/json", ".bin": "application/octet-stream", ".mp4": "video/mp4", ".png": "image/png",
+          ".csv": "text/csv", ".mat": "application/octet-stream", ".bvh": "text/plain", ".glb": "model/gltf-binary"}
+
+
+@app.get("/files3d/{name}/{kk}/{fname:path}")
+def files3d(name: str, kk: str, fname: str, request: Request):
+    sid = ctx(request)
+    if not _ALLOWED3D.match(fname) or (HOSTED and fname == "mesh.bin"):
+        raise HTTPException(404, "Not found")
+    p = _k3d_paths(name, kk, None, sid)
+    f = os.path.join(p["dir"], *fname.split("/"))
+    if not os.path.exists(f):
+        raise HTTPException(404, "Not found")
+    ext = os.path.splitext(f)[1]
+    headers = {"Content-Disposition": f'attachment; filename="{os.path.basename(f)}"'} \
+        if fname.startswith("exports/") else None
+    return FileResponse(f, media_type=_MEDIA.get(ext, "application/octet-stream"), headers=headers)
+
+
+@app.get("/api/k3d/{name}/{kk}/bundle.zip")
+def k3d_bundle(name: str, kk: str, request: Request, key_v: str | None = None, videos: bool = True):
+    sid = ctx(request)
+    p = _k3d_paths(name, kk, key_v, sid)
+    stem = os.path.splitext(name)[0]
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    tmp.close()
+    with zipfile.ZipFile(tmp.name, "w") as z:
+        z.write(p["json"], "kinematics.json", compress_type=zipfile.ZIP_DEFLATED)
+        z.write(p["params"], "settings.json", compress_type=zipfile.ZIP_DEFLATED)
+        for sub in ("exports", "figures"):
+            d = p[sub]
+            if os.path.isdir(d):
+                for f in sorted(os.listdir(d)):
+                    z.write(os.path.join(d, f), f"{sub}/{f}",
+                            compress_type=zipfile.ZIP_STORED if f.endswith(".png") else zipfile.ZIP_DEFLATED)
+        if videos and key_v and os.path.exists(p["display"]):
+            z.write(p["display"], "segmented_hand.mp4", compress_type=zipfile.ZIP_STORED)
+        z.writestr("README.txt", f"{APP_NAME} {APP_VERSION} 3D hand kinematics for {name}\n"
+                                 "Frames: world (head motion removed), wrist (palm: Kabsch fit of the wrist and the "
+                                 "knuckles), rigid fingers (knuckle -> tip).\n"
+                                 "exports/: CSV tables (transforms, joints, series, angles, metrics, coherence), "
+                                 "kinematics.mat, hand.bvh, hand_animation.glb.\n"
+                                 "figures/: PNG 300 dpi. Units: mm, degrees, seconds.\n"
+                                 "Please cite TREVIDEON, WiLoR (Potamias et al. 2025) and MANO (Romero et al. 2017).\n")
+    return FileResponse(tmp.name, media_type="application/zip", filename=f"{stem}_3d_{kk}.zip",
+                        background=BackgroundTask(lambda: os.remove(tmp.name)))
+
+
+@app.get("/api/assets/hand/{side}.fbx")
+def hand_fbx(side: str):
+    if HOSTED or side not in ("right", "left"):
+        raise HTTPException(404, "Not available")
+    f = _hand_fbx(side)
+    if not f:
+        raise HTTPException(404, "VibeSkin hand model not found")
+    return FileResponse(f, media_type="application/octet-stream", headers={"Cache-Control": "max-age=86400"})
 
 
 # ------------------------------------------------------------------------------------------------ frontend (local)

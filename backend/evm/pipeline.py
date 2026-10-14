@@ -425,7 +425,11 @@ def worker_main(spec: dict, queue, cancel_event):
     def report(d):
         queue.put(d)
     try:
-        r = run_job(spec, report, cancel_event.is_set)
+        if spec.get("kind") == "kin3d":
+            from .kin3d.pipeline import run_job3d
+            r = run_job3d(spec, report, cancel_event.is_set)
+        else:
+            r = run_job(spec, report, cancel_event.is_set)
         queue.put({"state": "done", "progress": 1.0, "stage": "done", "message": "Done", **r})
     except Cancelled:
         queue.put({"state": "cancelled", "message": "Cancelled"})

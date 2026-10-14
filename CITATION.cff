@@ -6,8 +6,9 @@ abstract: >-
   Open-source tool for identifying and quantifying hand tremor from video. It magnifies sub-pixel tremor with
   phase-based Eulerian Video Magnification (Riesz pyramid), measures it with dense optical flow on the
   un-magnified video (frequency, amplitude, band power, spectra, envelopes), optionally isolates the dominant
-  hand with a wrist-anchored, size-normalised view, repairs repeated video frames, and computes tremor
-  statistics for user-defined event markers.
+  hand with a wrist-anchored, size-normalised view, repairs repeated video frames, computes tremor
+  statistics for user-defined event markers, and reconstructs 3D hand kinematics (world, wrist and
+  rigid-finger frames) to measure each finger's vibration relative to the wrist.
 authors:
   - family-names: Sankar
     given-names: B.
@@ -26,6 +27,7 @@ keywords:
   - optical flow
   - hand tracking
   - stress
+  - 3D hand pose
   - biomedical engineering
 references:
   - type: article
@@ -43,3 +45,13 @@ references:
     authors: [{family-names: Kroeger, given-names: Till}, {family-names: Timofte, given-names: Radu}, {family-names: Dai, given-names: Dengxin}, {family-names: Van Gool, given-names: Luc}]
     conference: {name: "European Conference on Computer Vision (ECCV)"}
     year: 2016
+  - type: conference-paper
+    title: "WiLoR: End-to-end 3D Hand Localization and Reconstruction in-the-wild"
+    authors: [{family-names: Potamias, given-names: Rolandos Alexandros}, {family-names: Zhang, given-names: Jinglei}, {family-names: Deng, given-names: Jiankang}, {family-names: Zafeiriou, given-names: Stefanos}]
+    conference: {name: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)"}
+    year: 2025
+  - type: article
+    title: "Embodied Hands: Modeling and Capturing Hands and Bodies Together"
+    authors: [{family-names: Romero, given-names: Javier}, {family-names: Tzionas, given-names: Dimitrios}, {family-names: Black, given-names: Michael J.}]
+    journal: "ACM Transactions on Graphics (Proc. SIGGRAPH Asia)"
+    year: 2017

@@ -9,6 +9,10 @@
       Python packages in backend\requirements.txt
     * downloads the model files into backend\models (MediaPipe hand landmarker + multiclass segmenter,
       SAM 2.1 small for GPU hand segmentation)
+    * with an NVIDIA GPU: the WiLoR 3D hand model for the 3D Kinematics tab (code into backend\third_party\WiLoR,
+      2.6 GB checkpoint into backend\models). WiLoR also needs the MANO hand model, which you download yourself
+      (free registration, research licence) from https://mano.is.tue.mpg.de and unzip into ..\data\mano_data
+      (or backend\models\mano). Without it the 3D tab uses MediaPipe.
     * installs the website packages and builds the website
   Later runs start in a few seconds. Everything runs locally: no video leaves this computer.
 
@@ -22,6 +26,7 @@
 .PARAMETER Rebuild     Rebuild the website even if it looks up to date.
 .PARAMETER Cpu         Install / use the CPU-only PyTorch build even if a GPU is present.
 .PARAMETER NoBrowser   Do not open the browser.
+.PARAMETER NoWilor     Do not install the WiLoR 3D hand model (the 3D tab then uses MediaPipe).
 
 .EXAMPLE
   .\run.ps1
@@ -35,7 +40,8 @@ param(
   [switch]$Dev,
   [switch]$Rebuild,
   [switch]$Cpu,
-  [switch]$NoBrowser
+  [switch]$NoBrowser,
+  [switch]$NoWilor
 )
 
 # 'Continue': Windows PowerShell 5.1 turns stderr output of native tools (pip/npm warnings) into terminating
@@ -120,6 +126,58 @@ foreach ($m in $ModelFiles.Keys) {
     Step "Downloading model $m"
     try { Invoke-WebRequest -Uri $ModelFiles[$m] -OutFile $dst -UseBasicParsing -ErrorAction Stop }
     catch { Remove-Item $dst -ErrorAction SilentlyContinue; Fail "Could not download $m ($($_.Exception.Message))" }
+  }
+}
+
+# ---------------------------------------------------------------- WiLoR (3D Kinematics; optional, GPU)
+function Get-File([string]$url, [string]$dst) {
+  $part = "$dst.part"
+  $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
+  if ($curl) { & curl.exe -L --fail --retry 5 -C - -o $part $url; $ok = ($LASTEXITCODE -eq 0) }
+  else {
+    $ProgressPreference = 'SilentlyContinue'
+    try { Invoke-WebRequest -Uri $url -OutFile $part -UseBasicParsing -ErrorAction Stop; $ok = $true } catch { $ok = $false }
+  }
+  if ($ok) { Move-Item -Force $part $dst }
+  return $ok
+}
+if ($hasGpu -and -not $NoWilor) {
+  $WilorReq = Join-Path $Backend 'requirements-wilor.txt'
+  $wHash = (Get-FileHash $WilorReq -Algorithm SHA1).Hash
+  $wStamp = Join-Path $Venv '.requirements-wilor.sha1'
+  if (-not (Test-Path $wStamp) -or (Get-Content $wStamp -Raw).Trim() -ne $wHash) {
+    Step 'Installing the WiLoR packages'
+    & $Py -m pip install -r $WilorReq --quiet
+    if ($LASTEXITCODE -eq 0) { Set-Content -Path $wStamp -Value $wHash }
+  }
+  $ThirdParty = Join-Path $Backend 'third_party'
+  $WilorDir = Join-Path $ThirdParty 'WiLoR'
+  if (-not (Test-Path (Join-Path $WilorDir 'wilor\models\wilor.py'))) {
+    Step 'Downloading the WiLoR code (CC BY-NC-ND 4.0, github.com/rolpotamias/WiLoR)'
+    New-Item -ItemType Directory -Force $ThirdParty | Out-Null
+    $zip = Join-Path $ThirdParty 'wilor_main.zip'
+    if (Get-File 'https://github.com/rolpotamias/WiLoR/archive/refs/heads/main.zip' $zip) {
+      Expand-Archive -Path $zip -DestinationPath $ThirdParty -Force
+      if (Test-Path $WilorDir) { Remove-Item -Recurse -Force $WilorDir }
+      Rename-Item (Join-Path $ThirdParty 'WiLoR-main') 'WiLoR'
+      Remove-Item $zip
+    } else { Write-Host 'Could not download the WiLoR code; the 3D tab will use MediaPipe.' -ForegroundColor Yellow }
+  }
+  $WilorCkpt = Join-Path $Models 'wilor_final.ckpt'
+  if (-not (Test-Path $WilorCkpt)) {
+    Step 'Downloading the WiLoR checkpoint (2.6 GB, huggingface.co/spaces/rolpotamias/WiLoR)'
+    if (-not (Get-File 'https://huggingface.co/spaces/rolpotamias/WiLoR/resolve/main/pretrained_models/wilor_final.ckpt' $WilorCkpt)) {
+      Write-Host 'Could not download the WiLoR checkpoint; the 3D tab will use MediaPipe.' -ForegroundColor Yellow
+    }
+  }
+  $manoDirs = @($env:TREVIDEON_MANO_DIR, (Join-Path $Models 'mano'), (Join-Path $Root '..\data\mano_data\models'),
+                (Join-Path $Root '..\data\mano_data')) | Where-Object { $_ }
+  if (-not ($manoDirs | Where-Object { Test-Path (Join-Path $_ 'MANO_RIGHT.pkl') })) {
+    Write-Host ''
+    Write-Host '  MANO hand model not found: the 3D tab uses MediaPipe until it is installed.' -ForegroundColor Yellow
+    Write-Host '  Register at https://mano.is.tue.mpg.de, download "Models & Code" (mano_v1_2.zip) and unzip it so that' -ForegroundColor Gray
+    Write-Host '  MANO_RIGHT.pkl is in ..\data\mano_data\models (or backend\models\mano). Research licence; not redistributed.' -ForegroundColor Gray
+    Write-Host ''
   }
 }
 

@@ -24,7 +24,10 @@ async function req(path, opts = {}) {
   })
   if (!r.ok) {
     let msg = r.statusText
-    try { msg = (await r.json()).detail || msg } catch { /* ignore */ }
+    try {
+      const det = (await r.json()).detail
+      msg = Array.isArray(det) ? det.map((d) => `${(d.loc || []).slice(1).join('.')}: ${d.msg}`).join('; ') : det || msg
+    } catch { /* ignore */ }
     const e = new Error(msg)
     e.status = r.status
     throw e
@@ -118,6 +121,19 @@ export const api = {
   job: (id) => req(`/api/jobs/${id}`),
   cancel: (id) => req(`/api/jobs/${id}/cancel`, { method: 'POST' }),
   result: (v, ka, kb) => req(`/api/result/${enc(v)}/${ka}${kb ? `?key_b=${kb}` : ''}`),
+
+  // 3D kinematics
+  k3dCheck: (video, settings) => req('/api/k3d/check', { method: 'POST', body: { video, settings } }),
+  k3dProcess: (video, settings) => req('/api/k3d/process', { method: 'POST', body: { video, settings } }),
+  k3dProcessAll: (items) => req('/api/k3d/process_all', { method: 'POST', body: { items } }),
+  k3dResults: (v) => req(`/api/videos/${enc(v)}/k3d`),
+  k3dResult: (v, k, kv) => req(`/api/k3d/${enc(v)}/${k}${kv ? `?key_v=${kv}` : ''}`),
+  async fetchJson(path) {
+    const r = await fetch(url(path))
+    if (!r.ok) throw new Error(r.statusText)
+    return r.json()
+  },
+  handFbxUrl: (side) => API_BASE + `/api/assets/hand/${side}.fbx`,
 }
 
 export const ANCHOR_COLORS = {

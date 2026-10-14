@@ -70,7 +70,7 @@ class JobManager:
             job = {"id": jid, "owner": owner, "video": video, "key_a": key_a, "key_b": key_b, "spec": spec,
                    "state": "queued", "progress": 0.0, "stage": "queued", "message": "Waiting in queue",
                    "created": time.time(), "cancel": self.ex.make_event(),
-                   "isolation": bool(spec["settings"].get("hand_isolation"))}
+                   "isolation": bool(spec["settings"].get("hand_isolation")), "kind": spec.get("kind", "evm")}
             self.jobs[jid] = job
             self.order.append(jid)
         self.q.put(jid)

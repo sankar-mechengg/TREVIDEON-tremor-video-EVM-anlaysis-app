@@ -10,10 +10,19 @@ It implements methods described in:
   - Wu et al., Eulerian Video Magnification for Revealing Subtle Changes in the World, SIGGRAPH 2012.
   - Wadhwa et al., Riesz Pyramids for Fast Phase-Based Video Magnification, ICCP 2014.
   - Kroeger et al., Fast Optical Flow using Dense Inverse Search, ECCV 2016.
+  - Potamias et al., WiLoR: End-to-end 3D Hand Localization and Reconstruction in-the-wild, CVPR 2025.
+  - Romero, Tzionas, Black, Embodied Hands: Modeling and Capturing Hands and Bodies Together (MANO), SIGGRAPH Asia 2017.
 
 Third-party components (used, not modified; each under its own license):
   - MediaPipe (hand landmarker, multiclass selfie segmenter) - Apache License 2.0
   - SAM 2 / SAM 2.1 (Meta Platforms) - Apache License 2.0
+  - WiLoR (Potamias et al., CVPR 2025; optional 3D hand model) - CC BY-NC-ND 4.0. Downloaded at install time into
+    backend/third_party/WiLoR and imported unchanged; not redistributed with TREVIDEON. Its YOLO hand detector
+    (Ultralytics, AGPL-3.0) is not used.
+  - MANO hand model (Max Planck Institute for Intelligent Systems) - non-commercial research licence; must be
+    downloaded by each user from https://mano.is.tue.mpg.de; never redistributed or served by TREVIDEON
+  - smplx (MANO layer used by WiLoR) - see its licence; timm, einops, yacs, PyTorch Lightning - Apache-2.0 / MIT
+  - Matplotlib (figures) - Matplotlib licence (PSF-based)
   - OpenCV - Apache License 2.0
   - PyTorch - BSD-3-Clause; NumPy, SciPy - BSD-3-Clause
   - FastAPI (MIT), Starlette (BSD-3-Clause), Uvicorn (BSD-3-Clause)
@@ -22,5 +31,7 @@ Third-party components (used, not modified; each under its own license):
   - GSAP - GSAP Standard "No Charge" License (https://gsap.com/standard-license)
 
 Model weights are downloaded at install time from their publishers and remain under their licenses.
+The VibeSkin VR "Animated Hands" mesh shown optionally in the 3D view is read from the user's own Unity project on
+their computer; it is not part of TREVIDEON and is never served in hosted mode.
 The RISE Lab and IIT Delhi names and logos are trademarks of their owners and are not licensed under the
 Apache License; they identify where the software was developed and must not be used to imply endorsement.

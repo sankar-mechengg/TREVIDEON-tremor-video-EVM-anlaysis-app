@@ -61,7 +61,8 @@ function estimateMin(settings, v, gpu) {
 
 export default function SettingsPanel({
   schema, settings, setSettings, onReset, status, onProcess, job, onCancel, videoInfo, recommended, onAutoSegment,
-  onRunAll, nVideos = 0, gpu = false, presets = [], onPreset,
+  onRunAll, nVideos = 0, gpu = false, presets = [], onPreset, estimate = estimateMin,
+  labels = { partial: '↻ Overlay re-render only (motion analysis cached)', fastStage: 'overlay' },
 }) {
   const [open, setOpen] = useState(() => Object.fromEntries(schema.map((g) => [g.group, true])))
   const set = (k, v) => setSettings((s) => ({ ...s, [k]: v }))
@@ -70,9 +71,9 @@ export default function SettingsPanel({
   let statusEl = null
   if (status) {
     if (status.stage_a_cached && status.stage_b_cached) statusEl = <div className="status ok">✓ Cached — result loads instantly</div>
-    else if (status.stage_a_cached) statusEl = <div className="status warn">↻ Overlay re-render only (motion analysis cached)</div>
+    else if (status.stage_a_cached) statusEl = <div className="status warn">{labels.partial}</div>
     else {
-      const est = estimateMin(settings, videoInfo, gpu)
+      const est = estimate(settings, videoInfo, gpu)
       statusEl = <div className="status todo">⚙ Full processing required (≈ {est} min{gpu ? ', GPU' : ''})</div>
     }
   }
@@ -95,7 +96,7 @@ export default function SettingsPanel({
           <section key={g.group} className={`group ${g.fields.some((f) => f.key === 'hand_isolation') ? 'iso' : ''} ${g.fields.some((f) => f.key === 'hand_isolation') && settings.hand_isolation ? 'on' : ''}`}>
             <button className="group-head" onClick={() => setOpen((o) => ({ ...o, [g.group]: !o[g.group] }))}>
               <span>{open[g.group] ? '▾' : '▸'} {g.group}</span>
-              {g.fields[0].stage === 'overlay' && <span className="badge">fast re-render</span>}
+              {g.fields[0].stage === labels.fastStage && <span className="badge">fast re-render</span>}
             </button>
             {open[g.group] && (
               <div className="group-body">

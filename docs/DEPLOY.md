@@ -51,6 +51,17 @@ Without Modal (`TREVIDEON_EXECUTOR=local`) the jobs run on the container's CPU: 
 2. Environment variable `VITE_API_BASE=https://<your-railway-domain>` (no trailing slash).
 3. Deploy. Large uploads go directly from the browser to Railway in 8 MB chunks (never through Vercel).
 
+## 3D Kinematics on the hosted site
+
+The Modal worker builds the WiLoR code into its image; the checkpoint and the MANO model go on a separate Volume
+(see the top of `backend/modal_app.py`). Without them the 3D tab runs MediaPipe. The hosted site never serves the
+MANO mesh (only joints / rotations / series) and never offers the VibeSkin hand model.
+
+**Licences to clear first:** MANO is licensed for non-commercial research only and "may not be made available in
+any form to any third party"; WiLoR's weights are CC BY-NC-ND 4.0. Running them on a public web service for
+other people may need permission from the Max Planck Institute (ps-license@tue.mpg.de) and the WiLoR authors.
+Until then, deploy the hosted 3D tab with MediaPipe only (simply leave the `trevideon-models` Volume empty).
+
 ## 4. Before going public
 
 * Review `PRIVACY.md` / the Privacy and Terms pages with IIT Delhi.

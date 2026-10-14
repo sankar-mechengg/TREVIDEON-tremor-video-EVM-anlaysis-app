@@ -12,3 +12,18 @@ frontend/dist/
 .env
 *.local
 *.part
+# third-party code / weights downloaded at install time (own licences, not redistributed)
+backend/third_party/
+backend/models/*.ckpt
+backend/models/mano/
+# never commit model weights or the MANO hand model (research licence), wherever they are placed
+**/MANO_*.pkl
+**/SMPLH_*.pkl
+**/mano_data/
+backend/models/*.pkl
+backend/models/*.pth
+backend/models/*.onnx
+*.ckpt
+# results / caches written by the app if pointed inside the repo
+**/acquire.npz
+**/kinematics.npz

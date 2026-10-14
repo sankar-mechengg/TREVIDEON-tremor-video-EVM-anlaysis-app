@@ -8,6 +8,7 @@ import { ANCHOR_COLORS, api } from '../api.js'
 
 gsap.registerPlugin(ScrollTrigger)
 const Hero3D = lazy(() => import('./Hero3D.jsx'))   // three.js loads after the page is visible
+const Example3D = lazy(() => import('./Example3D.jsx'))
 
 const STEPS = [
   ['01', 'Record', `Film the hand at ${SPECS.recFps} fps or more (egocentric or fixed camera, bright flicker-free light).`],
@@ -16,7 +17,8 @@ const STEPS = [
   ['04', 'Isolate', 'Optional: cut out the dominant hand and pin the wrist so voluntary movement disappears.'],
   ['05', 'Magnify', 'Phase-based Eulerian Video Magnification makes sub-pixel tremor visible (x15).'],
   ['06', 'Measure', 'Optical flow on the un-magnified video gives frequency, amplitude, spectra, envelopes.'],
-  ['07', 'Export', 'Download videos, metrics, spectra and marker-segment statistics as one ZIP.'],
+  ['07', '3D', 'Optional: rebuild the hand in 3D (WiLoR / MediaPipe) and measure each finger relative to the wrist.'],
+  ['08', 'Export', 'Download videos, metrics, spectra and marker-segment statistics as one ZIP.'],
 ]
 
 const FAQ = [
@@ -169,7 +171,14 @@ export default function Home() {
         <Reveal><Example /></Reveal>
       </section>
 
-      <section className="sec alt" id="record">
+      <section className="sec alt" id="kin3d">
+        <Reveal as="h2">3D kinematics: each finger&apos;s own tremor</Reveal>
+        <Reveal as="p" className="lead">The hand is rebuilt in 3D in every frame and described by coordinate frames: the world, the wrist, and one rigid frame per finger. A finger&apos;s pose relative to the wrist removes the motion of the hand as a whole, leaving that finger&apos;s own vibration. It is measured with sub-pixel optical flow in the wrist frame and checked against a measured noise floor. Below, the wrist is frozen and only the finger tremor is magnified.</Reveal>
+        <Reveal><Suspense fallback={<div className="ex3d-loading">Loading the 3D example…</div>}><Example3D /></Suspense></Reveal>
+        <Reveal className="center-cta"><Link className="btn primary" to="/analyze/3d">Open the 3D tab →</Link></Reveal>
+      </section>
+
+      <section className="sec" id="record">
         <Reveal as="h2">Record it right</Reveal>
         <div className="rec-grid">
           <Reveal className="rec-card big">
@@ -184,7 +193,7 @@ export default function Home() {
         <Reveal className="center-cta"><Link className="btn primary" to="/guide">Full recording guide →</Link></Reveal>
       </section>
 
-      <section className="sec" id="markers">
+      <section className="sec alt" id="markers">
         <Reveal as="h2">Marker CSV (optional)</Reveal>
         <div className="two">
           <Reveal>
@@ -211,7 +220,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sec alt">
+      <section className="sec">
         <Reveal as="h2">What you get</Reveal>
         <div className="cards4">
           {[['Videos', 'Segment, magnified (×α) and tremor-overlay MP4s, synchronised in the player'],
@@ -223,7 +232,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sec" id="privacy">
+      <section className="sec alt" id="privacy">
         <div className="two">
           <Reveal>
             <h2>Nothing is kept</h2>
@@ -241,7 +250,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sec alt" id="cite">
+      <section className="sec" id="cite">
         <Reveal as="h2">How to cite</Reveal>
         <Reveal as="p" className="lead">If {APP.name} helps your research, please cite the software (and the methods it builds on, listed on the Cite page).</Reveal>
         <Reveal>
@@ -256,7 +265,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <section className="sec">
+      <section className="sec alt">
         <Reveal as="h2">Who made it</Reveal>
         <div className="team">
           <Reveal className="person"><b>{PEOPLE.developer.name}</b><span>Developer</span>
@@ -268,7 +277,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sec alt">
+      <section className="sec">
         <Reveal as="h2">Questions</Reveal>
         <div className="faq">
           {FAQ.map(([q, a]) => (

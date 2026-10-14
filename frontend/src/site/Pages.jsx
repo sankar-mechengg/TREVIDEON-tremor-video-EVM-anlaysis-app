@@ -68,6 +68,16 @@ export function Guide() {
       <h2 id="consent">6. Consent and privacy</h2>
       <p>Only record and upload videos of people who have given their informed consent (and, for research, under the approval of your ethics committee). Prefer framing that shows only the hand.</p>
 
+      <h2 id="kin3d">7. 3D kinematics tab</h2>
+      <p>The <Link to="/analyze/3d">3D tab</Link> reconstructs the hand in 3D in every frame and describes it with three kinds of coordinate frames:</p>
+      <ul>
+        <li><b>World</b>: the first camera position, with the rotation of a head-mounted camera removed (tracked on the static background). Z points up from the floor when the floor plane can be estimated. Head translation is not removed.</li>
+        <li><b>Wrist (palm)</b>: the wrist and the four knuckles as one rigid body. Origin at the wrist, y towards the fingers, z out of the back of the hand.</li>
+        <li><b>Finger</b>: each finger as one rigid body, from its knuckle to its tip.</li>
+      </ul>
+      <p>A finger's pose relative to the wrist removes the motion of the hand as a whole (and any head or camera motion), leaving that finger's own vibration. It is measured in two ways. The <b>model</b> way uses the 3D model directly; it gives the frames and orientation, but its jitter is about a tenth of a millimetre or more. The <b>hybrid</b> way uses sub-pixel optical flow in the wrist frame, which resolves micrometre tremor. Each comes with a measured noise floor, and the hybrid measurement only sees motion across the image. Record at 100 fps or more for frequencies up to about 45 Hz.</p>
+      <p><b>Installing WiLoR (optional, recommended).</b> On a computer with an NVIDIA GPU, <code>run.ps1</code> downloads the WiLoR code and checkpoint. WiLoR also needs the MANO hand model: register at <a href="https://mano.is.tue.mpg.de" target="_blank" rel="noreferrer">mano.is.tue.mpg.de</a> (free, research licence), download <i>Models &amp; Code</i>, and unzip it so that <code>MANO_RIGHT.pkl</code> is in <code>data\mano_data\models</code> next to your raw videos (or in <code>backend\models\mano</code>). Without it the 3D tab uses MediaPipe's 3D landmarks.</p>
+
       <div className="center-cta"><Link className="btn primary" to="/analyze">Analyse a video →</Link></div>
     </Page>
   )
@@ -220,7 +230,11 @@ export function About() {
           <tr><td>FastAPI / Starlette</td><td>API server</td><td>MIT / BSD-3-Clause</td></tr>
           <tr><td>FFmpeg (imageio-ffmpeg)</td><td>video encoding</td><td>LGPL / GPL builds</td></tr>
           <tr><td>React, React Router, Vite</td><td>website</td><td>MIT</td></tr>
-          <tr><td>three.js</td><td>3-D home animation</td><td>MIT</td></tr>
+          <tr><td>three.js</td><td>3-D home animation, 3D hand view</td><td>MIT</td></tr>
+          <tr><td>WiLoR (Potamias et al., CVPR 2025), optional</td><td>3D hand pose (downloaded at install, not redistributed)</td><td>CC BY-NC-ND 4.0</td></tr>
+          <tr><td>MANO hand model (MPI-IS), optional</td><td>hand model used by WiLoR (each user downloads it)</td><td>non-commercial research licence</td></tr>
+          <tr><td>smplx, timm, einops, yacs, PyTorch Lightning</td><td>WiLoR dependencies</td><td>own licences / Apache-2.0 / MIT</td></tr>
+          <tr><td>Matplotlib</td><td>exported figures</td><td>Matplotlib (PSF-based)</td></tr>
           <tr><td>GSAP</td><td>animation</td><td>GSAP Standard “No Charge” License</td></tr>
         </tbody>
       </table>

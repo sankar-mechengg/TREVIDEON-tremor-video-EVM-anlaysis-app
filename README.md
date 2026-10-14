@@ -15,6 +15,14 @@ TREVIDEON magnifies and measures hand tremor in ordinary videos. Upload one or m
 * **frame-timing repair**: repeated frames (screen / VR recordings, variable-frame-rate phones) are replaced
   by motion-interpolated frames; dropped frames are detected and reported;
 * **marker statistics**: tremor metrics for every marked segment / event, for stress–tremor correlation;
+* **3D kinematics** (own tab): the hand is reconstructed in 3D in every frame (WiLoR + MANO on a GPU, MediaPipe
+  otherwise) and described by three kinds of coordinate frames - a world frame (head-mounted camera rotation
+  removed, Z up from the floor), a wrist (palm) frame, and one rigid-body frame per finger. Each finger's pose
+  relative to the wrist gives its own vibration with the hand's overall motion removed; it is measured both
+  from the 3D model and, far more sensitively, from sub-pixel optical flow expressed in the wrist frame, each
+  with a measured noise floor. The tab shows the segmented video next to an interactive 3D hand (frames,
+  ×N magnification of finger tremor with the wrist frozen, trails, tremor ellipsoids) and synced plots, and
+  exports CSV, MATLAB, BVH / glTF animation and 300 dpi figures;
 * one **ZIP** with videos, `metrics.csv`, `marker_metrics.csv`, `analysis.json` and the settings.
 
 All numbers come from optical flow (DIS) on the *un-magnified* video; magnification is only a visual aid.
@@ -41,6 +49,11 @@ If scripts are blocked: `powershell -ExecutionPolicy Bypass -File .\run.ps1`.
 In the app, **Browse…** chooses the video folder; results go to the sibling `results` folder
 (`…\data\raw` → `…\results`) and are reused as a cache. Locally there are no limits on file size or
 segment length, and nothing leaves your computer.
+
+**3D tab with WiLoR:** on a computer with an NVIDIA GPU, `run.ps1` also downloads the WiLoR code and checkpoint
+(2.6 GB). WiLoR needs the MANO hand model, which you download yourself (free registration, research licence) from
+[mano.is.tue.mpg.de](https://mano.is.tue.mpg.de) and unzip so that `MANO_RIGHT.pkl` is in `..\data\mano_data\models`
+(or `backend\models\mano`). Without it the 3D tab uses MediaPipe.
 
 Command line (no web app):
 
@@ -77,6 +90,7 @@ backend/            FastAPI server + processing (evm/), Dockerfile (Railway), mo
   evm/magnify*.py   Riesz-pyramid EVM (NumPy CPU and PyTorch CUDA) and linear EVM
   evm/markers.py    marker CSV parsing and per-marker metrics
   evm/storage.py    local library vs. ephemeral hosted sessions
+  evm/kin3d/        3D kinematics: WiLoR / MediaPipe 3D pose, head motion, frames, hybrid vibration, exports
 frontend/           React + Vite website (home with three.js / GSAP, analysis portal, guide, legal pages)
 scripts/            helpers (e.g. packaging the home-page example)
 docs/DEPLOY.md      hosting on Vercel (website) + Railway (API) + Modal (GPU)
@@ -103,7 +117,7 @@ deleted 60 min after the last activity (or on request). See [docs/DEPLOY.md](doc
 ```
 
 Please also cite Wu et al. 2012 (EVM), Wadhwa et al. 2014 (Riesz pyramids) and Kroeger et al. 2016 (DIS
-optical flow); see `CITATION.cff`.
+optical flow), and for the 3D tab Potamias et al. 2025 (WiLoR) and Romero et al. 2017 (MANO); see `CITATION.cff`.
 
 ## License
 

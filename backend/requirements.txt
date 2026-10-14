@@ -10,3 +10,4 @@ uvicorn[standard]>=0.30
 imageio-ffmpeg>=0.5
 python-multipart>=0.0.9
 sam2>=1.1.0
+matplotlib>=3.8

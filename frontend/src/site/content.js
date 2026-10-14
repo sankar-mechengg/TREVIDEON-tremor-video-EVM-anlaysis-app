@@ -43,6 +43,8 @@ export const METHOD_REFS = [
   { key: 'Kroeger 2016', text: 'Kroeger T, Timofte R, Dai D, Van Gool L. Fast Optical Flow using Dense Inverse Search. European Conference on Computer Vision (ECCV), 2016.', use: 'tremor measurement (optical flow)' },
   { key: 'Zhang 2020', text: 'Zhang F, Bazarevsky V, Vakunov A, Tkachenka A, Sung G, Chang C-L, Grundmann M. MediaPipe Hands: On-device Real-time Hand Tracking. CVPR Workshop on Computer Vision for AR/VR, 2020.', use: 'hand landmarks' },
   { key: 'Ravi 2024', text: 'Ravi N, Gabeur V, Hu Y-T, et al. SAM 2: Segment Anything in Images and Videos. arXiv:2408.00714, 2024.', use: 'hand segmentation (GPU)' },
+  { key: 'Potamias 2025', text: 'Potamias RA, Zhang J, Deng J, Zafeiriou S. WiLoR: End-to-end 3D Hand Localization and Reconstruction in-the-wild. IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2025.', use: '3D hand pose (3D tab)' },
+  { key: 'Romero 2017', text: 'Romero J, Tzionas D, Black MJ. Embodied Hands: Modeling and Capturing Hands and Bodies Together. ACM Transactions on Graphics (SIGGRAPH Asia) 36(6), 2017.', use: 'MANO hand model (3D tab)' },
 ]
 
 export const SPECS = {

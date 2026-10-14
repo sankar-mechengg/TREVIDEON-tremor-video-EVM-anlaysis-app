@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { api, fmtBytes } from '../api.js'
 
@@ -139,9 +140,19 @@ export function MarkersPanel({ video, markers, onChange }) {
 }
 
 /* ------------------------------------------------------------------ steps */
-export function Stepper({ steps, onStep, onTour, right }) {
+export function ModeTabs({ current }) {
+  return (
+    <div className="mode-tabs" role="tablist">
+      <Link role="tab" className={`mode-tab ${current === 'evm' ? 'on' : ''}`} to="/analyze">Tremor · EVM</Link>
+      <Link role="tab" className={`mode-tab ${current === '3d' ? 'on' : ''}`} to="/analyze/3d">3D kinematics</Link>
+    </div>
+  )
+}
+
+export function Stepper({ steps, onStep, onTour, right, left }) {
   return (
     <div className="stepper">
+      {left}
       <ol>
         {steps.map((s, i) => (
           <li key={s.id} className={`${s.state}`} onClick={() => onStep(s)}>
@@ -210,7 +221,7 @@ export function QueuePanel({ jobs, onCancel, onOpen }) {
       {[...active, ...recent].map((j) => (
         <div key={j.id} className={`q-item ${j.state}`}>
           <div className="q-line">
-            <span className="q-name" title={j.video} onClick={() => onOpen(j)}>{j.video}{j.isolation ? ' · isolated' : ''}</span>
+            <span className="q-name" title={j.video} onClick={() => onOpen(j)}>{j.video}{j.kind === 'kin3d' ? ' · 3D' : j.isolation ? ' · isolated' : ''}</span>
             <span className="mono">{j.state === 'running' ? `${Math.round((j.progress || 0) * 100)}%` : j.state === 'queued' ? `#${j.queue_position}` : j.state}</span>
           </div>
           {j.state === 'running' && <div className="bar"><div style={{ width: `${(j.progress || 0) * 100}%` }} /></div>}

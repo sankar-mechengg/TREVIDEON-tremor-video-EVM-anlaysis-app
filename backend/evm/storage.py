@@ -59,7 +59,10 @@ class LocalLibrary:
         prefs = self._load_prefs()
         self.recent: list[str] = prefs.get("recent", [])
         self.custom_results: dict[str, str] = prefs.get("results", {})
-        self.set_data_dir(data_dir, results_dir)
+        self.set_data_dir(data_dir)
+        if results_dir:            # start-up override (run.ps1 -ResultsDir / env): this session only, not saved
+            self.results_dir = str(Path(results_dir).resolve())
+            os.makedirs(self.results_dir, exist_ok=True)
 
     # ---- preferences (only on this computer)
     def _load_prefs(self) -> dict:

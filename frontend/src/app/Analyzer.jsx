@@ -8,7 +8,7 @@ import Timeline from '../components/Timeline.jsx'
 import VideoList from '../components/VideoList.jsx'
 import { Header } from '../site/Layout.jsx'
 import { APP } from '../site/content.js'
-import { LibraryBar, MarkersPanel, QueuePanel, Stepper, Tour, UploadPanel } from './Panels.jsx'
+import { LibraryBar, MarkersPanel, ModeTabs, QueuePanel, Stepper, Tour, UploadPanel } from './Panels.jsx'
 
 const LS_SETTINGS = 'trevideon.settings.v1'
 const LS_SEL = 'trevideon.selected'
@@ -150,7 +150,7 @@ export default function Analyzer() {
   useEffect(() => {
     if (!sel || !settings) return
     const h = setTimeout(() => {
-      api.check(sel, settings).then((s) => { setStatus(s); setNotice(s.notes?.length ? s.notes.join(' · ') : null) }).catch(() => setStatus(null))
+      api.check(sel, settings).then((s) => { setStatus({ ...s, video: sel }); setNotice(s.notes?.length ? s.notes.join(' · ') : null) }).catch(() => setStatus(null))
     }, 250)
     return () => clearTimeout(h)
   }, [sel, settings])
@@ -160,7 +160,7 @@ export default function Analyzer() {
   }, [sel])
 
   useEffect(() => {
-    if (status?.stage_a_cached && status?.stage_b_cached &&
+    if (status?.video === sel && status?.stage_a_cached && status?.stage_b_cached &&
         (result?.key_a !== status.key_a || result?.key_b !== status.key_b || result?.video !== sel)) {
       loadResult(status.key_a, status.key_b)
     }
@@ -178,9 +178,9 @@ export default function Analyzer() {
         setJobs(js)
         js.filter((j) => j.state === 'done' && !doneSeen.current.has(j.id)).forEach((j) => {
           doneSeen.current.add(j.id)
-          if (j.video === sel) {
-            api.results(sel).then(setHistory)
-            api.check(sel, settings).then(setStatus)
+          if (j.video === sel && settings) {
+            api.results(sel).then(setHistory).catch(() => {})
+            api.check(sel, settings).then((st) => setStatus({ ...st, video: sel })).catch(() => {})
           }
           refreshVideos()
         })
@@ -257,7 +257,7 @@ export default function Analyzer() {
   if (!cfg) return <div className="app-shell"><Header compact /><div className="fatal">Loading…</div></div>
 
   const showing = result && result.analysis.video === sel && result.video === sel
-  const busyHere = jobs.find((j) => j.video === sel && ['queued', 'running'].includes(j.state))
+  const busyHere = jobs.find((j) => j.video === sel && j.kind !== 'kin3d' && ['queued', 'running'].includes(j.state))
   const leftSrc = showing ? url(result.urls.original) : sel ? api.rawUrl(sel) : null
   const rightUrl = showing ? (rightMode === 'overlay' && result.urls.overlay ? result.urls.overlay
     : rightMode === 'isolated' && result.urls.isolated ? result.urls.isolated : result.urls.magnified) : null
@@ -277,6 +277,7 @@ export default function Analyzer() {
     <div className="app-shell">
       <Header compact />
       <Stepper steps={steps} onStep={(s) => scrollTo(s.target)} onTour={() => setTour(true)}
+        left={<ModeTabs current="evm" />}
         right={hosted ? (
           <div className="session-box">
             <span className="dim" title="Your files are deleted automatically after this much inactivity">
